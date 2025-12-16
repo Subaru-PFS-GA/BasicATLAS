@@ -342,7 +342,10 @@ def init_synthe():
         self.set_f93(*[self.meta[key] for key in self.meta], self.vturb)
 
         # Now that we have access to the run meta data, we can create an appropriately sized output array for SYNTHE
-        self.asynth = np.zeros([self.meta['n_wl'], 72], dtype = np.float32, order = 'F')
+        if not hasattr(self, 'asynth') or len(self.asynth) != self.meta['n_wl']:
+            self.asynth = np.zeros([self.meta['n_wl'], 72], dtype = np.float32, order = 'F')
+        else:
+            self.asynth[:,:] = 0.0
         self.set_asynth.argtypes = [ctypes.c_void_p, ctypes.c_int]
         pointer = self.asynth.ctypes.data_as(ctypes.c_void_p)
         self.set_asynth(pointer, self.meta['n_wl'])
@@ -450,7 +453,10 @@ def init_spectrv():
         self.set_mask(pointer, self.meta['n_wl'])
 
         # Create an array to store the output spectrum
-        self.spectrum = np.zeros([self.meta['n_wl'], 2], dtype = np.float64, order = 'F')
+        if not hasattr(self, 'spectrum') or len(self.spectrum) != self.meta['n_wl']:
+            self.spectrum = np.zeros([self.meta['n_wl'], 2], dtype = np.float64, order = 'F')
+        else:
+            self.spectrum[:,:] = 0.0
         self.set_spectrum.argtypes = [ctypes.c_void_p, ctypes.c_int]
         pointer = self.spectrum.ctypes.data_as(ctypes.c_void_p)
         self.set_spectrum(pointer, self.meta['n_wl'])
