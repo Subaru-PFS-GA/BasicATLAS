@@ -265,7 +265,7 @@ def atlas(output_dir, settings = Settings(), restart = 'auto', niter = 450, ODF 
         copyfile(ODF + '/p00big{}.bdf'.format(settings.vturb), output_dir + '/odf_9.bdf')
         copyfile(ODF + '/kappa.ros'.format(settings.vturb), output_dir + '/odf_1.ros')
     else:
-        vturb_available = [i for o in map(lambda x: re.findall('p00big([0-9]+)\.bdf', x), os.listdir(ODF)) for i in o]
+        vturb_available = [i for o in map(lambda x: re.findall(r'p00big([0-9]+)\.bdf', x), os.listdir(ODF)) for i in o]
         raise ValueError('ODF not calculated for vturb={}. Available vturb: {}'.format(settings.vturb, vturb_available))
 
     # Prepare restart
@@ -882,7 +882,7 @@ def parse_atlas_abundances(file, classic_style = True, lookahead = 0, lookbehind
         start = content[:content[:start].rfind('\n')].rfind('\n')
         element_listing = content[start:end]
         for i in range(1, 100):
-            elements += [float(re.findall('[^0-9]{} +([0-9-]+\.[0-9]+)'.format(i), element_listing)[0].strip())]
+            elements += [float(re.findall(r'[^0-9]{} +([0-9-]+\.[0-9]+)'.format(i), element_listing)[0].strip())]
 
     if len(params) != 0:
         for i in range(lookbehind):
