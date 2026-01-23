@@ -29,39 +29,33 @@ If you are using **BasicATLAS** in your research, please cite [Larkin et al. (20
 
 ## Installation
 
-(see OS-specific notes below)
+### Grid of restart files
 
-This repository does not contain the source code of **ATLAS** or any of the required data files (e.g. line lists). Both must be downloaded from the websites listed above. A download script is provided using `wget` that works at the time of writing (10/21/2022). A test script is provided to ensure that all the necessary files are present and have correct MD5 checksums.
+**BasicATLAS** uses a grid of pre-computed model atmospheres as initial guesses for temperature-pressure profiles in structure calculations. This repository contains a reduced grid of models; however, we recommend downloading the full grid from [Google Drive](https://drive.google.com/file/d/1xBhLEdUBZTjtHHg110FVH6G-rYFaPHTk/view?usp=sharing) and placing it in `BasicATLAS/restarts/light.h5`.
 
-After cloning the repository, confirm that both GNU and Intel Fortran compilers are available in your environment.
+### Download legacy code and data files
 
-```bash
-$ ifort --version
-ifort (IFORT) 2021.3.0 20210609
-Copyright (C) 1985-2021 Intel Corporation.  All rights reserved.
-
-$ gfortran --version
-GNU Fortran (Ubuntu 7.4.0-1ubuntu1~18.04.1) 7.4.0
-Copyright (C) 2017 Free Software Foundation, Inc.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-```
-
-In the directory of the repository, first run the download script to fetch all data files and missing source code:
+Run the wget-based bash script `download.com` to retrieve the original **ATLAS**/**SYNTHE**/**DFSYNTHE** Fortran codes and required data files (line lists, chemical constants etc):
 
 ```bash
 source download.com
 ```
 
-The download involves multiple gigabytes of data and may take a few minutes. Please check that no errors are reported in the process. When the download completes, compile all Fortran source code with:
+### Compile the code
+
+To compile the legacy code, both Intel and GNU Fortran compilers are required. Intel compilers are typically not available by default, but can be installed as part of the [oneAPI Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit-download.html). Follow the instructions on the oneAPI website to install the Toolkit for your operating system (both GUI and command line installers are available). Once installed, the Toolkit must be initialized before every use by running the `setvars.sh` script:
+
+```bash
+sh ~/intel/oneapi/setvars.sh
+```
+
+Once installed and initialized, you must be able to use the `ifx` command in your terminal. Then run the compile script in **BasicATLAS**:
 
 ```bash
 source compile.com
 ```
 
-The script will also carry out a few necessary rearrangements ("[repacking](https://wwwuser.oats.inaf.it/castelli/sources/dfsynthe.html)") of line lists and some source code patching.
-
-Finally, run the test script to make sure the installation was successful:
+Finally, verify that the installation completed successfully by running
 
 ```bash
 python test.py
@@ -69,42 +63,13 @@ python test.py
 
 The test is clean if no output is produced.
 
-## Examples
+### PyTLAS sub-module
 
-* [Constructing the simplest model with solar parameters](https://github.com/Roman-UCSD/BasicATLAS/blob/master/examples/sun_model.ipynb)
-* [Interpreting the detailed output of ATLAS and SYNTHE](https://github.com/Roman-UCSD/BasicATLAS/blob/master/examples/output.ipynb)
-* [Calculating opacity distribution functions and using them for non-solar abundances](https://github.com/Roman-UCSD/BasicATLAS/blob/master/examples/custom_abun.ipynb)
-* [Advanced features and settings](https://github.com/Roman-UCSD/BasicATLAS/blob/master/examples/advanced.md)
+**BasicATLAS** is shipped with the **PyTLAS** sub-module, which implements a modified version of the **SYNTHE** suite that runs entirely in memory. **PyTLAS** is necessary e.g. for abundance fitting with [chemfit](https://github.com/Roman-UCSD/chemfit). To enable **PyTLAS**:
 
-## MacOS Installation
-
-In order to use Intel Fortran, both the [oneAPI Base Toolkit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/base-toolkit/download.html) and the [oneAPI HPC Toolkit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/hpc-toolkit/download.html) will need to be installed first.
-
-After following the installation steps, the toolkits will need to be initialized using:
-
-```bash
-. /opt/intel/oneapi/setvars.sh
+```
+cd PyTLAS
+source compile.com
 ```
 
-Homebrew can be used to install GNU Fortran and wget:
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install gcc
-brew install wget
-```
-
-Proceed with regular download and compilation from here.
-
-## Windows Installation
-
-While all programs can be compiled natively on Windows, it is recommended to use the Ubuntu environment instead, available at the [Microsoft Store](https://apps.microsoft.com/store/detail/ubuntu/9PDXGNCFSCZV). To install Intel compilers in your Ubuntu environment (courtesy of [Somajit](https://gist.github.com/SomajitDey/aeb6eb4c8083185e06800e1ece4be1bd)):
-
-1. `curl -Lo- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo gpg --dearmor -o /usr/share/keyrings/oneapi-archive-keyring.gpg`
-2. `sudo tee /etc/apt/sources.list.d/oneAPI.list <<< "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main"`
-3. `sudo apt update`
-4. `sudo apt install intel-oneapi-compiler-fortran`
-5. Optional: `sudo apt install intel-oneapi-mkl`
-6. In `~/.bashrc`: `source /opt/intel/oneapi/setvars.sh > /dev/null`
-
-Proceed with regular download and compilation from here.
+This should generate `spectrv.so`, `synthe.so` and `xnfpelsyn.so` in `BasicATLAS/PyTLAS/bin/`.
