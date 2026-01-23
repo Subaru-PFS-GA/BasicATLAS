@@ -262,8 +262,8 @@ def atlas(output_dir, settings = Settings(), restart = 'auto', niter = 450, ODF 
 
     # Prepare ODF
     if os.path.isfile(ODF + '/p00big{}.bdf'.format(settings.vturb)):
-        copyfile(ODF + '/p00big{}.bdf'.format(settings.vturb), output_dir + '/odf_9.bdf')
-        copyfile(ODF + '/kappa.ros'.format(settings.vturb), output_dir + '/odf_1.ros')
+        ODF_filename = os.path.realpath(ODF + '/p00big{}.bdf'.format(settings.vturb))
+        kapparos_filename = os.path.realpath(ODF + '/kappa.ros'.format(settings.vturb))
     else:
         vturb_available = [i for o in map(lambda x: re.findall(r'p00big([0-9]+)\.bdf', x), os.listdir(ODF)) for i in o]
         raise ValueError('ODF not calculated for vturb={}. Available vturb: {}'.format(settings.vturb, vturb_available))
@@ -286,7 +286,9 @@ def atlas(output_dir, settings = Settings(), restart = 'auto', niter = 450, ODF 
       'gravity': settings.logg,
       'vturb': str(int(settings.vturb)),
       'output_dir': output_dir,
-      'enable_molecules': ['OFF', 'ON'][molecules]
+      'enable_molecules': ['OFF', 'ON'][molecules],
+      'kapparos': kapparos_filename,
+      'ODF': ODF_filename,
     }
     for z, abundance in enumerate(settings.atlas_abun()):
         cards['element_' + str(z)] = abundance

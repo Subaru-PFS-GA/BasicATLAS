@@ -30,8 +30,8 @@ BEGIN                    ITERATION  15 COMPLETED
 
 atlas_control_start = """
 cd {output_dir}
-ln -s odf_1.ros fort.1
-ln -s odf_9.bdf fort.9
+ln -s {kapparos} fort.1
+ln -s {ODF} fort.9
 ln -s {molecules} fort.2
 ln -s {initial_model} fort.3 
 """

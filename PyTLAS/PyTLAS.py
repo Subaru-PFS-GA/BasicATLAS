@@ -137,7 +137,7 @@ def load_f18(filename):
             content[i,j] = nanfloat(line[14 + (j - 2) * 7:14 + (j - 1) * 7])
     return content
 
-def init_xnfpelsyn():
+def init_xnfpelsyn(lib_filename = False):
     """Initialize XNFPELSYN
     
     The XNFPELSYN code calculates the chemical equilibrium and continuum opacity in the atmosphere. The
@@ -146,6 +146,12 @@ def init_xnfpelsyn():
     This function loads the XNFPELSYN library, makes the necessary data files (fort.2 and fort.17) available
     to it, defines a structure to store the output and binds methods to push the ATLAS structure into the
     library, to update chemical composition and to run XNFPELSYN calculations
+
+    Parameters
+    ----------
+    lib_filename : str
+        Path to the xnfpelsyn.so library. Defaults to `False`, in which case python_path/bin/xnfpelsyn.so is
+        assumed
     
     Returns
     -------
@@ -153,7 +159,10 @@ def init_xnfpelsyn():
         XNFPELSYN library with `.load_structure()` and `.run()` methods bound to it
     """
     # Load the library
-    lib = ctypes.CDLL('{}/{}'.format(python_path, 'bin/xnfpelsyn.so'))
+    if type(lib_filename) is bool:
+        lib = ctypes.CDLL('{}/{}'.format(python_path, 'bin/xnfpelsyn.so'))
+    else:
+        lib = ctypes.CDLL(lib_filename)
 
     # Load continua.dat (fort.17)
     lib.f17 = load_text('{}/{}'.format(python_path, '../data/synthe_files/continua.dat'))
@@ -254,7 +263,7 @@ def load_linelist(linelist_dir):
     ----------
     linelist_dir : str
         Path to the directory with fort.12, fort.19 and fort.93
-    
+
     Returns
     -------
     f12: array_like
@@ -291,7 +300,7 @@ def load_linelist(linelist_dir):
 
     return f12, f19, meta
 
-def init_synthe():
+def init_synthe(lib_filename = False):
     """Initialize SYNTHE
     
     The SYNTHE code calculates the line opacity throughout the atmosphere. The code requires the output of XNFPELSYN
@@ -307,6 +316,11 @@ def init_synthe():
 
     This function loads the SYNTHE library and binds methods to push the linelist and the XNFPELSYN output into the
     library, as well as a method to run the SYNTHE calculation
+
+    Parameters
+    ----------
+    lib_filename : str
+        Path to the synthe.so library. Defaults to `False`, in which case python_path/bin/synthe.so is assumed
     
     Returns
     -------
@@ -314,7 +328,10 @@ def init_synthe():
         SYNTHE library with `.load_linelist()`, `.load_xnfpelsyn()` and `.run()` methods bound to it
     """
     # Load the library
-    lib = ctypes.CDLL('{}/{}'.format(python_path, 'bin/synthe.so'))
+    if type(lib_filename) is bool:
+        lib = ctypes.CDLL('{}/{}'.format(python_path, 'bin/synthe.so'))
+    else:
+        lib = ctypes.CDLL(lib_filename)
 
     # Flag to track if SYNTHE has run
     lib.has_run = False
@@ -376,7 +393,7 @@ def init_synthe():
 
     return lib
 
-def init_spectrv():
+def init_spectrv(lib_filename = False):
     """Initialize SPECTRV
     
     The SPECTRV code takes the continuum opacity calculated with XNFPELSYN and the line opacity calculated with
@@ -387,6 +404,11 @@ def init_spectrv():
 
     The resulting SPECTRV object will also have the `mask` bound attribute (defaults to all True) which allows some
     wavelength points to be skipped in the radiative transfer calculation
+
+    Parameters
+    ----------
+    lib_filename : str
+        Path to the spectrv.so library. Defaults to `False`, in which case python_path/bin/spectrv.so is assumed
     
     Returns
     -------
@@ -394,7 +416,10 @@ def init_spectrv():
         SPECTRV library with `.load_xnfpelsyn()`, `.load_synthe()`, `.run()` and `get_spectrum()` methods bound to it
     """
     # Load the library
-    lib = ctypes.CDLL('{}/{}'.format(python_path, 'bin/spectrv.so'))
+    if type(lib_filename) is bool:
+        lib = ctypes.CDLL('{}/{}'.format(python_path, 'bin/spectrv.so'))
+    else:
+        lib = ctypes.CDLL(lib_filename)
 
     # Flag to track if SPECTRV has run
     lib.has_run = False
