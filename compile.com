@@ -8,7 +8,9 @@ for c in "${required[@]}"; do
 done
 
 # Remove weak lines from the TiO linelist
-python data/linelists/reduce_tio.py -2.5
+if [ ! -f data/synthe_files/tiototo.original.asc ]; then
+    python data/linelists/reduce_tio.py -2.5
+fi
 
 # Compile DFSYNTHE and satellite packages
 ifx -o bin/xnfdf.exe src/xnfdf.for -save
